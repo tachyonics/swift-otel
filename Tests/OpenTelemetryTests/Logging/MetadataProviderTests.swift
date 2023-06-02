@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
+import ServiceContextModule
 @testable import Logging
 @testable import OpenTelemetry
 import XCTest
@@ -33,9 +33,9 @@ final class MetadataProviderTests: XCTestCase {
             isRemote: true
         )
 
-        var baggage = Baggage.topLevel
-        baggage.spanContext = spanContext
-        Baggage.$current.withValue(baggage) {
+        var serviceContext = ServiceContext.topLevel
+        serviceContext.spanContext = spanContext
+        ServiceContext.$current.withValue(serviceContext) {
             logger.info("This is a test message", metadata: ["explicit": "42"])
         }
 
@@ -65,9 +65,9 @@ final class MetadataProviderTests: XCTestCase {
             isRemote: true
         )
 
-        var baggage = Baggage.topLevel
-        baggage.spanContext = spanContext
-        Baggage.$current.withValue(baggage) {
+        var serviceContext = ServiceContext.topLevel
+        serviceContext.spanContext = spanContext
+        ServiceContext.$current.withValue(serviceContext) {
             logger.info("This is a test message", metadata: ["explicit": "42"])
         }
 

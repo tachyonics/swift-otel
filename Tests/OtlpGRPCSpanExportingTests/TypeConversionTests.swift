@@ -35,7 +35,7 @@ final class TypeConversionTests: XCTestCase {
                 traceFlags: .sampled,
                 isRemote: false
             ),
-            baggage: .topLevel,
+            serviceContext: .topLevel,
             startTime: startTime,
             endTime: endTime,
             attributes: [:],
@@ -53,7 +53,7 @@ final class TypeConversionTests: XCTestCase {
                 traceFlags: .sampled,
                 isRemote: false
             ),
-            baggage: .topLevel,
+            serviceContext: .topLevel,
             startTime: startTime,
             endTime: endTime,
             attributes: [:],
@@ -87,7 +87,7 @@ final class TypeConversionTests: XCTestCase {
                 traceFlags: .sampled,
                 isRemote: false
             ),
-            baggage: .topLevel,
+            serviceContext: .topLevel,
             startTime: startTime,
             endTime: endTime,
             attributes: [:],
@@ -127,7 +127,7 @@ final class TypeConversionTests: XCTestCase {
                 traceState: .init([("vendor", "value")]),
                 isRemote: false
             ),
-            baggage: .topLevel,
+            serviceContext: .topLevel,
             startTime: startTime,
             endTime: endTime,
             attributes: ["key": "value"],
@@ -135,7 +135,7 @@ final class TypeConversionTests: XCTestCase {
                 SpanEvent(name: "test", at: TracerClockMock(now: .init(nanosecondsSinceEpoch: eventStartTime)).now),
             ],
             // will be filtered out due to missing span context
-            links: [SpanLink(baggage: .topLevel, attributes: [:])],
+            links: [SpanLink(context: .topLevel, attributes: [:])],
             resource: OTel.Resource()
         )
         XCTAssertEqual(
@@ -395,8 +395,8 @@ final class TypeConversionTests: XCTestCase {
     // MARK: - SpanLink
 
     func test_convertSpanLink() {
-        var baggage = Baggage.topLevel
-        baggage.spanContext = OTel.SpanContext(
+        var serviceContext = ServiceContext.topLevel
+        serviceContext.spanContext = OTel.SpanContext(
             traceID: OTel.TraceID(bytes: (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)),
             spanID: OTel.SpanID(bytes: (1, 2, 3, 4, 5, 6, 7, 8)),
             traceFlags: .sampled,
@@ -404,7 +404,7 @@ final class TypeConversionTests: XCTestCase {
             isRemote: false
         )
 
-        let link = SpanLink(baggage: baggage, attributes: [:])
+        let link = SpanLink(context: serviceContext, attributes: [:])
 
         XCTAssertEqual(
             Opentelemetry_Proto_Trace_V1_Span.Link(link),
@@ -417,7 +417,7 @@ final class TypeConversionTests: XCTestCase {
     }
 
     func test_convertSpanLink_withoutSpanContext() {
-        XCTAssertNil(Opentelemetry_Proto_Trace_V1_Span.Link(SpanLink(baggage: .topLevel, attributes: [:])))
+        XCTAssertNil(Opentelemetry_Proto_Trace_V1_Span.Link(SpanLink(context: .topLevel, attributes: [:])))
     }
 }
 

@@ -25,9 +25,9 @@ final class RecordedSpanTests: XCTestCase {
             traceFlags: .sampled,
             isRemote: false
         )
-        var baggage = Baggage.topLevel
-        baggage.spanContext = spanContext
-        baggage[TestBaggageKey.self] = 42
+        var serviceContext = ServiceContext.topLevel
+        serviceContext.spanContext = spanContext
+        serviceContext[TestServiceContextKey.self] = 42
 
         let clock = MockClock()
         clock.setTime(42)
@@ -38,7 +38,7 @@ final class RecordedSpanTests: XCTestCase {
 
         let span = OTel.Tracer.Span(
             operationName: #function,
-            baggage: baggage,
+            context: serviceContext,
             kind: .internal,
             startTime: clock.now.nanosecondsSinceEpoch,
             attributes: attributes,
@@ -48,7 +48,7 @@ final class RecordedSpanTests: XCTestCase {
 
         span.addEvent(events[0])
         span.setStatus(status)
-        span.addLink(SpanLink(baggage: .topLevel, attributes: [:]))
+        span.addLink(SpanLink(context: .topLevel, attributes: [:]))
 
         clock.setTime(84)
         span.end(at: clock.now)
@@ -60,10 +60,10 @@ final class RecordedSpanTests: XCTestCase {
         XCTAssertEqual(recordedSpan.status, status)
         XCTAssertEqual(recordedSpan.context, spanContext)
         XCTAssertNil(
-            recordedSpan.baggage.spanContext,
-            "The baggage of a recorded span should not contain the span context."
+            recordedSpan.serviceContext.spanContext,
+            "The serviceContext of a recorded span should not contain the span context."
         )
-        XCTAssertEqual(recordedSpan.baggage[TestBaggageKey.self], 42)
+        XCTAssertEqual(recordedSpan.serviceContext[TestServiceContextKey.self], 42)
         XCTAssertEqual(recordedSpan.startTime, 42)
         XCTAssertEqual(recordedSpan.endTime, 84)
         XCTAssertEqual(recordedSpan.attributes, attributes)
@@ -80,8 +80,8 @@ final class RecordedSpanTests: XCTestCase {
             traceFlags: .sampled,
             isRemote: false
         )
-        var baggage = Baggage.topLevel
-        baggage.spanContext = spanContext
+        var serviceContext = ServiceContext.topLevel
+        serviceContext.spanContext = spanContext
 
         let span = OTel.Tracer.Span.stub()
 
@@ -95,6 +95,6 @@ final class RecordedSpanTests: XCTestCase {
     }
 }
 
-private enum TestBaggageKey: BaggageKey {
+private enum TestServiceContextKey: ServiceContextKey {
     typealias Value = Int
 }

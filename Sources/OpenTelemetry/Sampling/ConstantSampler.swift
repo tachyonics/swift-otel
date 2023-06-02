@@ -32,7 +32,7 @@ extension OTel {
             traceID: OTel.TraceID,
             attributes: SpanAttributes,
             links: [SpanLink],
-            parentBaggage: Baggage
+            parentServiceContext: ServiceContext
         ) -> OTel.SamplingResult {
             OTel.SamplingResult(decision: isOn ? .recordAndSample : .drop, attributes: [:])
         }

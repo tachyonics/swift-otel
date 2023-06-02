@@ -26,12 +26,12 @@ extension OTel.Tracer.Span {
         logger: Logger = Logger(label: #function),
         onEnd: @escaping (OTel.RecordedSpan) -> Void = { _ in }
     ) -> OTel.Tracer.Span {
-        var baggage = Baggage.topLevel
-        baggage.spanContext = spanContext
+        var serviceContext = ServiceContext.topLevel
+        serviceContext.spanContext = spanContext
 
         return OTel.Tracer.Span(
             operationName: operationName,
-            baggage: baggage,
+            context: serviceContext,
             kind: kind,
             startTime: startTime,
             attributes: attributes,

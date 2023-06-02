@@ -11,12 +11,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
+import ServiceContextModule
 @testable import OpenTelemetry
 import XCTest
 
 final class SpanContextTests: XCTestCase {
-    func test_storedInBaggage() {
+    func test_storedInServiceContext() {
         let spanContext = OTel.SpanContext(
             traceID: OTel.TraceID(bytes: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)),
             spanID: OTel.SpanID(bytes: (0, 0, 0, 0, 0, 0, 0, 2)),
@@ -26,14 +26,14 @@ final class SpanContextTests: XCTestCase {
             isRemote: false
         )
 
-        var baggage = Baggage.topLevel
-        XCTAssertNil(baggage.spanContext)
+        var serviceContext = ServiceContext.topLevel
+        XCTAssertNil(serviceContext.spanContext)
 
-        baggage.spanContext = spanContext
-        XCTAssertEqual(baggage.spanContext, spanContext)
+        serviceContext.spanContext = spanContext
+        XCTAssertEqual(serviceContext.spanContext, spanContext)
 
-        baggage.spanContext = nil
-        XCTAssertNil(baggage.spanContext)
+        serviceContext.spanContext = nil
+        XCTAssertNil(serviceContext.spanContext)
     }
 
     func test_stringConvertible_notSampled() {
