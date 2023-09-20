@@ -25,6 +25,7 @@ import NIO
 /// the collector running yet.
 public final class OtlpGRPCSpanExporter: OTelSpanExporter {
     private let client: Opentelemetry_Proto_Collector_Trace_V1_TraceServiceClient
+    private let channel: ClientConnection
     private let logger: Logger
 
     /// Initialize a new span exporter with the given configuration.
@@ -40,6 +41,7 @@ public final class OtlpGRPCSpanExporter: OTelSpanExporter {
             defaultCallOptions: .init(timeLimit: .timeout(.seconds(10)))
         )
         self.logger = config.logger
+        self.channel = channel
     }
 
     public func export<C: Collection>(_ batch: C) -> EventLoopFuture<Void> where C.Element == OTel.RecordedSpan {
@@ -60,6 +62,8 @@ public final class OtlpGRPCSpanExporter: OTelSpanExporter {
     }
 
     public func shutdownGracefully() -> EventLoopFuture<Void> {
-        client.channel.close()
+        let promise = self.channel.eventLoop.makePromise(of: Void.self)
+        client.channel.closeGracefully(deadline: .now() + TimeAmount.seconds(5), promise: promise)
+        return promise.futureResult
     }
 }
