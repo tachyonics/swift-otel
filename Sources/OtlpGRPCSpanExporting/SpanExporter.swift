@@ -62,8 +62,17 @@ public final class OtlpGRPCSpanExporter: OTelSpanExporter {
     }
 
     public func shutdownGracefully() -> EventLoopFuture<Void> {
+        self.logger.trace("Start shutdownGracefully")
+        
         let promise = self.channel.eventLoop.makePromise(of: Void.self)
         client.channel.closeGracefully(deadline: .now() + TimeAmount.seconds(5), promise: promise)
-        return promise.futureResult
+        let future = promise.futureResult
+        
+        let capturedLogger = self.logger
+        future.whenComplete { _ in
+            capturedLogger.trace("Complete shutdownGracefully")
+        }
+        
+        return future
     }
 }
